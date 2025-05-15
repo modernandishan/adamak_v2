@@ -16,7 +16,7 @@ class Register extends BaseRegister
             ->schema([
                 $this->getFirstNameFormComponent(),
                 $this->getLastNameFormComponent(),
-                $this->getEmailFormComponent(),
+                $this->getMobileFormComponent(),
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
             ]);
@@ -38,11 +38,14 @@ class Register extends BaseRegister
             ->maxLength(255);
     }
 
-    protected function getEmailFormComponent(): Component
+    protected function getMobileFormComponent(): Component
     {
-        return TextInput::make('email')
+        return TextInput::make('mobile')
             ->label('شماره موبایل')
+            ->minLength(11)
+            ->maxLength(11)
             ->tel()
+            ->regex('/^09[0-9]{9}$/')
             ->required()
             ->unique(User::class, 'mobile')
             ->autocomplete('off');
@@ -58,6 +61,11 @@ class Register extends BaseRegister
             'mobile' => $data['email'],
             'password' => $data['password'],
         ];
+    }
+
+    public static function getModel(): string
+    {
+        return User::class;
     }
 
     protected function handleRegistration(array $data): Model
