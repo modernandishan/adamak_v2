@@ -29,20 +29,20 @@ class ForgotPassword extends RequestPasswordReset
 
     public function request(): void
     {
-        // اختصاص مقدار mobile به email برای سازگاری با کلاس پایه
         if (isset($this->data['mobile'])) {
             $this->mobile = $this->data['mobile'];
             $this->email = $this->data['mobile'];
         }
 
+        $this->validate();
+
         try {
-            $this->rateLimit(5);
+            $this->rateLimit(3);
         } catch (TooManyRequestsException $exception) {
             $this->getRateLimitedNotification($exception)?->send();
             return;
         }
 
-        // بر اساس مرحله فعلی، متد مناسب را فراخوانی می‌کنیم
         if ($this->step === 'mobile') {
             $this->handleMobileStep();
             return;
@@ -113,19 +113,15 @@ class ForgotPassword extends RequestPasswordReset
         ];
     }
 
-    // این متد به فرم اطلاع می‌دهد که باید به روز شود
     public function updatedStep($value)
     {
-        // حفظ مقدار موبایل
         if (isset($this->data['mobile'])) {
             $this->mobile = $this->data['mobile'];
         }
 
-        // بازنشانی داده‌های فرم
         $this->reset('data');
         $this->form->fill([]);
 
-        // به‌روزرسانی اجباری DOM
         $this->dispatch('refreshForm');
     }
 
@@ -142,38 +138,48 @@ class ForgotPassword extends RequestPasswordReset
             return;
         }
 
-        // ارسال کد OTP
         $otpService = app(OtpService::class);
-        $code = $otpService->sendOtp($this->data['mobile']);
+        $result = $otpService->sendOtp($this->data['mobile']);
+        $code = $result['code'];
+        $isNewCode = $result['is_new'];
 
-        // برای اهداف توسعه، کد را نمایش می‌دهیم (در محیط تولید این خط را حذف کنید)
-        Notification::make()
-            ->title('کد تایید ارسال شد')
-            ->body("کد تایید شما: {$code}")
-            ->success()
-            ->send();
-
-        // ذخیره موبایل در متغیر جلسه
         $this->mobile = $this->data['mobile'];
         session(['reset_password_mobile' => $this->mobile]);
 
-        // خالی کردن فرم قبلی
+        if ($isNewCode) {
+            Notification::make()
+                ->title('کد تایید ارسال شد')
+                ->body("{$this->mobile} ارسال شد.کد تایید شما به شماره موبایل ")
+                ->success()
+                ->send();
+        } else {
+            Notification::make()
+                ->title('کد تایید')
+                ->body('کد تایید قبلاً برای شما ارسال شده است.')
+                ->info()
+                ->send();
+
+            if (env('APP_ENV') !== 'production') {
+                Notification::make()
+                    ->title('کد قبلی')
+                    ->body("کد تایید شما: {$code}")
+                    ->success()
+                    ->send();
+            }
+        }
+
         $this->reset('data');
         $this->form->fill([]);
 
-        // رفتن به مرحله بعد - این خط فراخوانی متد updatedStep را تریگر می‌کند
         $this->step = 'otp';
 
-        // رفرش اجباری صفحه
         $this->dispatch('refreshForm');
     }
 
     protected function handleOtpStep()
     {
-        // بررسی صحت کد OTP
         $otpService = app(OtpService::class);
 
-        // استفاده از مقدار ذخیره شده در جلسه یا متغیر کلاس
         $mobile = session('reset_password_mobile', $this->mobile);
         $otp = $this->data['otp'] ?? '';
 
@@ -188,21 +194,17 @@ class ForgotPassword extends RequestPasswordReset
             return;
         }
 
-        // نمایش پیام موفقیت
         Notification::make()
             ->title('کد تایید شد')
             ->body('لطفاً رمز عبور جدید خود را وارد کنید.')
             ->success()
             ->send();
 
-        // خالی کردن فرم قبلی
         $this->reset('data');
         $this->form->fill([]);
 
-        // رفتن به مرحله بعد
         $this->step = 'reset';
 
-        // رفرش اجباری صفحه
         $this->dispatch('refreshForm');
     }
 
@@ -261,7 +263,6 @@ class ForgotPassword extends RequestPasswordReset
         };
     }
 
-    // متد برای استفاده در بخش اعتبارسنجی
     public function rules()
     {
         return match ($this->step) {
@@ -279,7 +280,6 @@ class ForgotPassword extends RequestPasswordReset
         };
     }
 
-    // اضافه کردن متد mount برای اطمینان از مقداردهی اولیه صحیح
     public function mount(): void
     {
         parent::mount();

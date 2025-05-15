@@ -14,13 +14,26 @@ class OtpService
     {
         $this->smsClient = new Client(env('IPPANEL_API_KEY'));
     }
-    public function sendOtp(string $mobile): string
+    public function sendOtp(string $mobile, bool $force = false): array
     {
+        if (!$force) {
+            $existingCode = $this->getValidOtp($mobile);
+
+            if ($existingCode) {
+                return [
+                    'code' => $existingCode,
+                    'is_new' => false
+                ];
+            }
+        }
+
         OtpCode::where('mobile', $mobile)->delete();
+
         $digits = (int) env('IPPANEL_OTP_DIGITS', 4);
         $min = pow(10, $digits - 1);
         $max = pow(10, $digits) - 1;
         $code = (string) rand($min, $max);
+
         OtpCode::create([
             'mobile' => $mobile,
             'code' => $code,
@@ -29,9 +42,11 @@ class OtpService
 
         try {
             $formattedMobile = $this->formatMobileNumber($mobile);
+
             $patternValues = [
                 "code" => $code,
             ];
+
             $bulkId = $this->smsClient->sendPattern(
                 env('IPPANEL_REST_PASSWORD_PATTERN'),
                 env('IPPANEL_ORIGIN_NUMBER'),
@@ -49,13 +64,29 @@ class OtpService
 
             if (env('APP_ENV') !== 'production') {
                 Log::warning("Development mode: Ignoring SMS error and returning code anyway");
-                return $code;
+                return [
+                    'code' => $code,
+                    'is_new' => true
+                ];
             }
 
             throw $e;
         }
 
-        return $code;
+        return [
+            'code' => $code,
+            'is_new' => true
+        ];
+    }
+
+    public function getValidOtp(string $mobile): ?string
+    {
+        $otpCode = OtpCode::where('mobile', $mobile)
+            ->where('expires_at', '>', now())
+            ->latest()
+            ->first();
+
+        return $otpCode ? $otpCode->code : null;
     }
 
     public function verifyOtp(string $mobile, string $code): bool
