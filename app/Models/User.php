@@ -51,9 +51,14 @@ class User extends Authenticatable
     {
         return $this->belongsTo(User::class, 'referrer_id');
     }
-    
+
     public function referrals()
     {
         return $this->hasMany(User::class, 'referrer_id');
+    }
+
+    public function getNameAttribute(): string
+    {
+        return "{$this->first_name} {$this->last_name}";
     }
 }
