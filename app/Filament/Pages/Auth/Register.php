@@ -16,7 +16,7 @@ class Register extends BaseRegister
             ->schema([
                 $this->getFirstNameFormComponent(),
                 $this->getLastNameFormComponent(),
-                $this->getMobileFormComponent(),
+                $this->getEmailFormComponent(),
                 $this->getPasswordFormComponent(),
                 $this->getPasswordConfirmationFormComponent(),
             ]);
@@ -38,7 +38,7 @@ class Register extends BaseRegister
             ->maxLength(255);
     }
 
-    protected function getMobileFormComponent(): Component
+    protected function getEmailFormComponent(): Component
     {
         return TextInput::make('mobile')
             ->label('شماره موبایل')
@@ -58,7 +58,7 @@ class Register extends BaseRegister
         return [
             'first_name' => $data['first_name'],
             'last_name' => $data['last_name'],
-            'mobile' => $data['email'],
+            'mobile' => $data['mobile'],
             'password' => $data['password'],
         ];
     }

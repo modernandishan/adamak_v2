@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Pages\Auth\ForgotPassword;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Register;
 use Filament\FontProviders\LocalFontProvider;
@@ -32,7 +33,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('adamak')
             ->login(Login::class)
             ->registration(Register::class)
-            ->passwordReset()
+            ->passwordReset(ForgotPassword::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
