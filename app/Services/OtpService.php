@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\OtpCode;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use IPPanel\Client;
 use Exception;
@@ -96,7 +97,23 @@ class OtpService
             ->where('expires_at', '>', now())
             ->first();
 
-        return $otpCode !== null;
+        if ($otpCode === null) {
+            return false;
+        }
+
+        $user = User::where('mobile', $mobile)->first();
+
+        if ($user) {
+            if ($user->mobile_verified_at === null) {
+                $user->mobile_verified_at = now();
+                $user->save();
+                Log::info("Mobile verified for user {$user->id} ({$mobile})");
+            }
+        }
+
+        //$otpCode->delete();
+
+        return true;
     }
 
     private function formatMobileNumber(string $mobile): string

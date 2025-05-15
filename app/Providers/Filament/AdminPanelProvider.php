@@ -4,7 +4,9 @@ namespace App\Providers\Filament;
 
 use App\Filament\Pages\Auth\ForgotPassword;
 use App\Filament\Pages\Auth\Login;
+use App\Filament\Pages\Auth\Profile;
 use App\Filament\Pages\Auth\Register;
+use App\Http\Middleware\EnsureMobileVerified;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
 use BezhanSalleh\FilamentShield\FilamentShieldPlugin;
@@ -34,6 +36,7 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->registration(Register::class)
             ->passwordReset(ForgotPassword::class)
+            ->profile(Profile::class)
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -61,6 +64,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                //EnsureMobileVerified::class,
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
