@@ -33,7 +33,13 @@ class UserObserver
     {
         //
     }
-
+    public function updating(User $user): void
+    {
+        // بررسی تغییر شماره موبایل
+        if ($user->isDirty('mobile') && $user->getOriginal('mobile') !== null) {
+            $user->mobile_verified_at = null;
+        }
+    }
     /**
      * Handle the User "deleted" event.
      */

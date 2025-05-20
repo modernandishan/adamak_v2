@@ -64,7 +64,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                //EnsureMobileVerified::class,
+                EnsureMobileVerified::class,
             ])
             ->plugins([
                 FilamentShieldPlugin::make(),
