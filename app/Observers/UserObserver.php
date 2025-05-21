@@ -49,6 +49,15 @@ class UserObserver
     }
 
     /**
+     * Handle the User "deleting" event.
+     */
+    public function deleting(User $user): void
+    {
+        // قبل از حذف کاربر، referrer_id کاربرانی که این کاربر را به عنوان معرف دارند را به NULL تغییر می‌دهیم
+        User::where('referrer_id', $user->id)->update(['referrer_id' => null]);
+    }
+
+    /**
      * Handle the User "restored" event.
      */
     public function restored(User $user): void

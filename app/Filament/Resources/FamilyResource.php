@@ -83,25 +83,37 @@ class FamilyResource extends Resource
                     ->label('عنوان خانواده')
                     ->searchable(),
 
+                // اضافه کردن ستون نمایش صاحب خانواده
+                Tables\Columns\TextColumn::make('user.full_name')
+                    ->label('صاحب خانواده')
+                    ->searchable(['first_name', 'last_name'])
+                    ->sortable()
+                    // نمایش ستون فقط برای ادمین و سوپر ادمین
+                    ->visible(fn () => auth()->user()->hasRole(['admin', 'super_admin'])),
+
                 Tables\Columns\TextColumn::make('members_count')
                     ->label('تعداد اعضا')
                     ->counts('members'),
 
                 Tables\Columns\TextColumn::make('created_at')
+                    ->jalaliDate()
                     ->label('تاریخ ایجاد')
-                    ->dateTime('Y-m-d H:i')
                     ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -122,11 +134,21 @@ class FamilyResource extends Resource
         ];
     }
 
-    // محدود کردن نمایش خانواده‌ها به خانواده‌های کاربر جاری
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('user_id', auth()->id());
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ])
+            ->where(function ($query) {
+                // اگر کاربر ادمین یا سوپر ادمین است، تمام خانواده‌ها را نمایش بده
+                if (auth()->user()->hasRole(['admin', 'super_admin'])) {
+                    return $query;
+                }
+
+                // در غیر این صورت، فقط خانواده‌های خود کاربر را نمایش بده
+                return $query->where('user_id', auth()->id());
+            });
     }
 
     // افزودن user_id به رکورد هنگام ذخیره

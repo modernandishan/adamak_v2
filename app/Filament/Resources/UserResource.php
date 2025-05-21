@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Hash;
 
 class UserResource extends Resource
 {
@@ -20,8 +21,6 @@ class UserResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-user';
 
     protected static ?string $navigationGroup = 'مدیریت کاربران';
-
-    protected static ?string $recordTitleAttribute = 'full_name';
 
     protected static ?string $modelLabel = 'کاربر';
 
@@ -48,9 +47,17 @@ class UserResource extends Resource
                             ->required()
                             ->tel()
                             ->unique(ignoreRecord: true)
-                            ->maxLength(255),
+                            ->regex('/^09[0-9]{9}$/')
+                            ->minLength(11)
+                            ->maxLength(11)
+                            ->validationMessages([
+                                'regex' => 'شماره موبایل باید با 09 شروع شود و دقیقاً 11 رقم باشد',
+                                'min_length' => 'شماره موبایل باید دقیقاً 11 رقم باشد',
+                                'max_length' => 'شماره موبایل باید دقیقاً 11 رقم باشد',
+                            ]),
 
                         Forms\Components\DateTimePicker::make('mobile_verified_at')
+                            ->jalali()
                             ->label('تاریخ تایید موبایل')
                             ->nullable(),
 
@@ -73,7 +80,7 @@ class UserResource extends Resource
 
                         Forms\Components\Select::make('referrer_id')
                             ->label('معرف')
-                            ->relationship('referrer', 'full_name')
+                            ->relationship('referrer', 'first_name')
                             ->searchable()
                             ->preload()
                             ->nullable(),
@@ -110,18 +117,29 @@ class UserResource extends Resource
 
                         Forms\Components\TextInput::make('postal_code')
                             ->label('کد پستی')
-                            ->maxLength(255),
+                            ->regex('/^[0-9]{10}$/')
+                            ->length(10)
+                            ->numeric()
+                            ->validationMessages([
+                                'regex' => 'کد پستی باید دقیقاً 10 رقم باشد',
+                                'length' => 'کد پستی باید دقیقاً 10 رقم باشد',
+                            ]),
 
                         Forms\Components\DatePicker::make('birth_date')
+                            ->jalali()
                             ->label('تاریخ تولد'),
 
                         Forms\Components\TextInput::make('national_code')
                             ->label('کد ملی')
-                            ->maxLength(255),
-
-                        Forms\Components\TextInput::make('education_level')
-                            ->label('سطح تحصیلات')
-                            ->maxLength(255),
+                            ->regex('/^[0-9]{10}$/')
+                            ->length(10)
+                            ->numeric()
+                            ->unique('profiles', 'national_code', ignoreRecord: true)
+                            ->validationMessages([
+                                'regex' => 'کد ملی باید دقیقاً 10 رقم باشد',
+                                'length' => 'کد ملی باید دقیقاً 10 رقم باشد',
+                                'unique' => 'این کد ملی قبلاً ثبت شده است',
+                            ]),
                     ]),
 
                 Forms\Components\Section::make('نقش‌ها و مجوزها')
@@ -140,7 +158,7 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('full_name')
+                Tables\Columns\TextColumn::make('first_name')
                     ->label('نام کامل')
                     ->searchable(['first_name', 'last_name']),
 
@@ -150,9 +168,7 @@ class UserResource extends Resource
 
                 Tables\Columns\IconColumn::make('mobile_verified_at')
                     ->label('تایید موبایل')
-                    ->boolean()
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle'),
+                    ->boolean(),
 
                 Tables\Columns\TextColumn::make('wallet_balance')
                     ->label('موجودی کیف پول')
@@ -164,8 +180,8 @@ class UserResource extends Resource
                     ->badge(),
 
                 Tables\Columns\TextColumn::make('created_at')
+                    ->jalaliDate()
                     ->label('تاریخ ثبت نام')
-                    ->dateTime('Y-m-d H:i')
                     ->sortable(),
             ])
             ->filters([
@@ -177,15 +193,28 @@ class UserResource extends Resource
                 Tables\Filters\Filter::make('mobile_verified')
                     ->label('تایید موبایل')
                     ->query(fn ($query) => $query->whereNotNull('mobile_verified_at')),
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
             ]);
     }
 

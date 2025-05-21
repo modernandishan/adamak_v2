@@ -22,6 +22,7 @@ return new class extends Migration
             $table->foreignId('referrer_id')->nullable()->constrained('users');
             $table->string('referral_code')->unique();
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 

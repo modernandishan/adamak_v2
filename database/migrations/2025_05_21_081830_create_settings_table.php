@@ -11,12 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('families', function (Blueprint $table) {
+        Schema::create('settings', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('title');
+            $table->string('meta_title')->unique();
+            $table->text('meta_value')->nullable();
             $table->text('description')->nullable();
-            $table->softDeletes();
+            $table->string('type')->default('text');
+            $table->text('options')->nullable();
+            $table->boolean('is_private')->default(false);
             $table->timestamps();
         });
     }
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('families');
+        Schema::dropIfExists('settings');
     }
 };
