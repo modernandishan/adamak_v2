@@ -59,7 +59,7 @@ class TestResource extends Resource
 
                                 TiptapEditor::make('description')
                                     ->label('توضیحات کامل')
-                                    ->profile('custom')
+                                    ->profile('default')
                                     ->columnSpanFull(),
 
                                 Forms\Components\FileUpload::make('featured_image')
