@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ee12ae9fe9a1448c9e574a6d1457aaf8",
+    "content-hash": "ade39dc5417df530fcb5cac05362f09e",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -74,16 +74,16 @@
         },
         {
             "name": "awcodes/filament-tiptap-editor",
-            "version": "v3.5.13",
+            "version": "v3.5.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/awcodes/filament-tiptap-editor.git",
-                "reference": "17684330a0bc0e9cfbd40a1de89efea6f635ef74"
+                "reference": "ba0194224e34a1cd3c5b92c881c474c713321572"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/awcodes/filament-tiptap-editor/zipball/17684330a0bc0e9cfbd40a1de89efea6f635ef74",
-                "reference": "17684330a0bc0e9cfbd40a1de89efea6f635ef74",
+                "url": "https://api.github.com/repos/awcodes/filament-tiptap-editor/zipball/ba0194224e34a1cd3c5b92c881c474c713321572",
+                "reference": "ba0194224e34a1cd3c5b92c881c474c713321572",
                 "shasum": ""
             },
             "require": {
@@ -144,7 +144,7 @@
             ],
             "support": {
                 "issues": "https://github.com/awcodes/filament-tiptap-editor/issues",
-                "source": "https://github.com/awcodes/filament-tiptap-editor/tree/v3.5.13"
+                "source": "https://github.com/awcodes/filament-tiptap-editor/tree/v3.5.14"
             },
             "funding": [
                 {
@@ -152,7 +152,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2025-05-05T14:04:37+00:00"
+            "time": "2025-05-15T15:50:41+00:00"
         },
         {
             "name": "beberlei/assert",
