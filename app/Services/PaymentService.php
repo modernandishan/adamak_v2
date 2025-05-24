@@ -42,7 +42,7 @@ class PaymentService
             $invoice = (new Invoice)->amount($transaction->amount);
 
             // تنظیم درایور زرین‌پال
-            $payment = Payment::via('zarinpal');
+            $payment = new Payment(config('payment'));
 
             // تنظیم callback URL برای بازگشت از درگاه
             $callbackUrl = route('filament.admin.pages.payment-callback');
@@ -94,7 +94,8 @@ class PaymentService
             }
 
             // تایید پرداخت
-            $receipt = Payment::via('zarinpal')
+            $payment = new Payment(config('payment'));
+            $receipt = $payment
                 ->amount($transaction->amount)
                 ->transactionId($transactionId)
                 ->verify();
