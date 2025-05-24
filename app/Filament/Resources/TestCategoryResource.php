@@ -9,6 +9,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 
 class TestCategoryResource extends Resource
@@ -44,11 +46,6 @@ class TestCategoryResource extends Resource
                     ->label('توضیحات')
                     ->maxLength(1000)
                     ->columnSpanFull(),
-
-                Forms\Components\TextInput::make('icon')
-                    ->label('آیکون')
-                    ->maxLength(255)
-                    ->helperText('نام کلاس آیکون یا کد SVG'),
 
                 Forms\Components\TextInput::make('order')
                     ->label('ترتیب')
@@ -91,16 +88,29 @@ class TestCategoryResource extends Resource
                     ->sortable(),
             ])
             ->filters([
-                //
+                Tables\Filters\TernaryFilter::make('is_active')
+                    ->label('فعال'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\RestoreBulkAction::make(),
+                    Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),
+            ]);
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
             ]);
     }
 
