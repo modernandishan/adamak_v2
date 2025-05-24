@@ -13,7 +13,7 @@ class TestsList extends Page
     protected static ?string $navigationGroup = 'آزمون‌ها';
     protected static ?string $title = 'لیست آزمون‌ها';
     protected static ?string $navigationLabel = 'آزمون‌های من';
-    protected static ?int $navigationSort = 10;
+    //protected static ?int $navigationSort = 10;
 
     protected static string $view = 'filament.pages.tests-list';
 
