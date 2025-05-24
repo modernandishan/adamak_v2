@@ -4,6 +4,8 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -71,5 +73,25 @@ class User extends Authenticatable
     public function transactions()
     {
         return $this->hasMany(Transaction::class);
+    }
+
+    public function questionsByStage($stage): HasMany
+    {
+        return $this->hasMany(TestQuestion::class)
+            ->where('stage', $stage)
+            ->orderBy('order', 'asc');
+        // حذف sort از ترتیب‌سازی
+    }
+
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(TestPurchase::class);
+    }
+
+    public function purchasers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'test_purchases')
+            ->withPivot(['amount_paid', 'status', 'started_at', 'completed_at'])
+            ->withTimestamps();
     }
 }
