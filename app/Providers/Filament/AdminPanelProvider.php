@@ -6,6 +6,7 @@ use App\Filament\Pages\Auth\ForgotPassword;
 use App\Filament\Pages\Auth\Login;
 use App\Filament\Pages\Auth\Profile;
 use App\Filament\Pages\Auth\Register;
+use App\Filament\Widgets\WalletBalanceWidget;
 use App\Http\Middleware\EnsureMobileVerified;
 use Filament\FontProviders\LocalFontProvider;
 use Filament\Http\Middleware\Authenticate;
@@ -53,6 +54,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 Widgets\AccountWidget::class,
                 Widgets\FilamentInfoWidget::class,
+                WalletBalanceWidget::class
             ])
             ->middleware([
                 EncryptCookies::class,

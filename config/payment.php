@@ -330,10 +330,10 @@ return [
             'zaringateApiPaymentUrl' => 'https://www.zarinpal.com/pg/StartPay/:authority/ZarinGate',
             'zaringateApiVerificationUrl' => 'https://ir.zarinpal.com/pg/services/WebGate/wsdl',
 
-            'mode' => 'normal', // can be normal, sandbox, zaringate
-            'merchantId' => '',
-            'callbackUrl' => 'http://yoursite.com/path/to',
-            'description' => 'payment using zarinpal',
+            'mode' => env('ZARINPAL_MODE', 'sandbox'), // can be normal, sandbox, zaringate
+            'merchantId' => env('ZARINPAL_MERCHANT_ID', '00000000-0000-0000-0000-000000000000'),
+            'callbackUrl' => env('APP_URL') . '/adamak/transactions/callback',
+            'description' => 'شارژ کیف پول آدامک',
             'currency' => 'T', //Can be R, T (Rial, Toman)
         ],
         'zibal' => [
